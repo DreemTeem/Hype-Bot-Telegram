@@ -8,6 +8,18 @@ export class TextResponses {
     this.HBot = botReference;
     this.setBasicHypeResponses();
     this.setBasicTextCommands();
+    this.setVolcelResponse();
+  }
+
+  private setVolcelResponse(): void {
+    this.HBot.onText(/^\/volcel/i, (msg: any, match: any): void => {
+      const VOLCEL_POLICE_IMG = 'https://i.imgur.com/P5UMuVz.jpg';
+      const volcelResponse =
+        `🚨 WARNING WARNING 🚨 \n\n` +
+        `😫 THIS CHAT HAS BECOME TOO THIRSTY 😫 \n\n` +
+        `💦 PLEASE KEEP YOUR VITAL ESSENCES TO YOURSELVES AT ALL TIMES 💦`;
+      this.HBot.sendPhoto(msg.chat.id, VOLCEL_POLICE_IMG, { caption: volcelResponse });
+    });
   }
 
   private setBasicHypeResponses(): void {
