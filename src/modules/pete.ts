@@ -52,7 +52,7 @@ export class RatQuotes {
             'resonantly expanded by',
             'constantly informed by',
             'forever defined by',
-            'relies on',
+            'reliant on',
         ],
         nounThree: [
             'actions',
