@@ -1,5 +1,5 @@
-import * as TelegramBot from 'node-telegram-bot-api';
-import { Card, Cards } from 'scryfall-sdk';
+import * as TelegramBot from "node-telegram-bot-api";
+import { Card, Cards } from "scryfall-sdk";
 
 export class MTGSearch {
   private HBot: TelegramBot;
@@ -15,24 +15,33 @@ export class MTGSearch {
    */
   private setMTGCommandParser(): void {
     // Listener for messages beginning with '/mtg'
-    this.HBot.onText(/^\/mtg/i, (msg: TelegramBot.Message, match: any): void => {
-      const commandArray: string[] = msg.text.split(' ');
-      if (commandArray.length === 1) {
-        // TODO - Possibly integrate with native help commands?
-        this.showMissingQuery(msg);
-      } else {
-        const fullQueryString: string = commandArray.splice(1, commandArray.length).join(' ');
-        const queryObject: any = this.parseQueryString(fullQueryString);
-        if (queryObject.flags && queryObject.flags.random) {
-          this.getRandomMTGCard(msg);
+    this.HBot.onText(
+      /^\/mtg/i,
+      (msg: TelegramBot.Message, match: any): void => {
+        const commandArray: string[] = msg.text.split(" ");
+        if (commandArray.length === 1) {
+          // TODO - Possibly integrate with native help commands?
+          this.showMissingQuery(msg);
         } else {
-          this.searchMTGCards(msg, queryObject.queryString, queryObject.flags);
+          const fullQueryString: string = commandArray
+            .splice(1, commandArray.length)
+            .join(" ");
+          const queryObject: any = this.parseQueryString(fullQueryString);
+          if (queryObject.flags && queryObject.flags.random) {
+            this.getRandomMTGCard(msg);
+          } else {
+            this.searchMTGCards(
+              msg,
+              queryObject.queryString,
+              queryObject.flags
+            );
+          }
         }
       }
-    });
+    );
 
     // Listener for the 'text' event from Telegram. Used to listen for possible user selections of keyboard options.
-    this.HBot.on('text', (msg: TelegramBot.Message) => {
+    this.HBot.on("text", (msg: TelegramBot.Message) => {
       if (this.cardResultsByUserId[msg.from.id]) {
         this.respondToMTGKeyboardReply(msg);
       }
@@ -44,7 +53,10 @@ export class MTGSearch {
    * @param msg - The initial message sent to the bot. It allows us to send a message back.
    */
   private showMissingQuery(msg: TelegramBot.Message): void {
-    this.HBot.sendMessage(msg.chat.id, `Please provide something for me to search for. Try your favorite card name!`);
+    this.HBot.sendMessage(
+      msg.chat.id,
+      `Please provide something for me to search for. Try your favorite card name!`
+    );
   }
 
   /**
@@ -54,9 +66,9 @@ export class MTGSearch {
    * @param fullQueryString - Full query string including search params and flags.
    */
   private parseQueryString(fullQueryString: string): any {
-    const indexOfFirstFlag: number = fullQueryString.indexOf(' -');
+    const indexOfFirstFlag: number = fullQueryString.indexOf(" -");
     // TODO: During flag integration- If other flags can be executed without a query before them, find a more robust solution to add them here.
-    if (indexOfFirstFlag === -1 && fullQueryString.trim() !== '-r') {
+    if (indexOfFirstFlag === -1 && fullQueryString.trim() !== "-r") {
       return {
         queryString: fullQueryString,
       };
@@ -64,7 +76,9 @@ export class MTGSearch {
     // TODO: Fill out the following flags section with other appropriate flags.
     return {
       flags: {
-        random: fullQueryString.indexOf(' -r') >= 0 || fullQueryString.trim() === '-r',
+        random:
+          fullQueryString.indexOf(" -r") >= 0 ||
+          fullQueryString.trim() === "-r",
       },
       queryString: fullQueryString.slice(0, indexOfFirstFlag),
     };
@@ -78,13 +92,17 @@ export class MTGSearch {
   private getRandomMTGCard(msg: TelegramBot.Message): void {
     Cards.random().then(
       (card: any) => {
-        const priceCaption: string = card.usd ? `USD Price: $${card.usd}` : null;
-        this.HBot.sendPhoto(msg.chat.id, `${card.image_uris.normal}`, { caption: priceCaption });
+        const priceCaption: string = card.usd
+          ? `USD Price: $${card.usd}`
+          : null;
+        this.HBot.sendPhoto(msg.chat.id, `${card.image_uris.normal}`, {
+          caption: priceCaption,
+        });
       },
       (error: any) => {
         // This is for any unhandled errors that we're not expecting.
         this.HBot.sendMessage(msg.chat.id, `${error.response.body.details}`);
-      },
+      }
     );
   }
 
@@ -95,34 +113,47 @@ export class MTGSearch {
    * @param queryString - The custom query that was provided by the user.
    * @param params - Optional parameter that contains flags to refine the card search.
    */
-  private searchMTGCards(msg: TelegramBot.Message, queryString: string, params?: any): void {
-    this.HBot.sendMessage(msg.chat.id, `<b>Fetching MTG card results for "${queryString}"</b>\n`, { parse_mode: 'HTML', disable_web_page_preview: true });
+  private searchMTGCards(
+    msg: TelegramBot.Message,
+    queryString: string,
+    params?: any
+  ): void {
+    this.HBot.sendMessage(
+      msg.chat.id,
+      `<b>Fetching MTG card results for "${queryString}"</b>\n`,
+      { parse_mode: "HTML", disable_web_page_preview: true }
+    );
     const cardResults: Card[] = [];
     // TODO: Work on flushing out the params provided by the parseQueryString function. Start with sets.
-    Cards.search(queryString + ' order:released')
+    Cards.search(queryString + " order:released")
       // Called each time the API finds a card
-      .on('data', (card: Card) => {
+      .on("data", (card: Card) => {
         cardResults.push(card);
       })
       // Called if the API encounters an error.
-      .on('error', (error: any) => {
+      .on("error", (error: any) => {
         // The 'error' object has the following keys: ['name', 'statusCode', 'message', 'error', 'options', 'response']
         // Default API error message from Scryfall can be used at error.response.body.details
         if (error.statusCode === 404) {
           // We use a custom message here because the help link in the orignal message refers to dead link
-          this.HBot.sendMessage(msg.chat.id, `Sorry, your search query didn't match any cards. Please try refining your query or removing excess words.`);
+          this.HBot.sendMessage(
+            msg.chat.id,
+            `Sorry, your search query didn't match any cards. Please try refining your query or removing excess words.`
+          );
         } else {
           // This is for any unhandled errors that we're not expecting.
           this.HBot.sendMessage(msg.chat.id, `${error.response.body.details}`);
         }
       })
       // Called once the API says there are no more cards left for us to get.
-      .on('end', () => {
+      .on("end", () => {
         if (cardResults.length === 1) {
           // If there's only one card, we send the info/image directly.
           this.sendSingleCardResult(msg, cardResults[0]);
         } else {
-          const cardMatchFromName: Card = cardResults.find((card) => card.name.toLowerCase() === queryString.toLowerCase());
+          const cardMatchFromName: Card = cardResults.find(
+            (card) => card.name.toLowerCase() === queryString.toLowerCase()
+          );
           if (cardMatchFromName) {
             this.sendSingleCardResult(msg, cardMatchFromName);
           } else {
@@ -146,7 +177,7 @@ export class MTGSearch {
       },
       (error) => {
         this.HBot.sendMessage(msg.chat.id, `${error.response.body.details}`);
-      },
+      }
     );
   }
 
@@ -161,9 +192,9 @@ export class MTGSearch {
     if (card.card_faces) {
       // Multi faced card case
       card.card_faces.forEach((cardFace: any, index: number) => {
-        this.HBot.sendPhoto(msg.chat.id, `${cardFace.image_uris.normal}`,
-        {
-          caption: index === card.card_faces.length - 1 ? priceCaption : undefined,
+        this.HBot.sendPhoto(msg.chat.id, `${cardFace.image_uris.normal}`, {
+          caption:
+            index === card.card_faces.length - 1 ? priceCaption : undefined,
           reply_markup: {
             remove_keyboard: true,
             selective: true,
@@ -172,15 +203,14 @@ export class MTGSearch {
         });
       });
     } else {
-      this.HBot.sendPhoto(msg.chat.id, `${card.image_uris.normal}`,
-        {
-          caption: priceCaption,
-          reply_markup: {
-            remove_keyboard: true,
-            selective: true,
-          },
-          reply_to_message_id: msg.message_id,
-        });
+      this.HBot.sendPhoto(msg.chat.id, `${card.image_uris.normal}`, {
+        caption: priceCaption,
+        reply_markup: {
+          remove_keyboard: true,
+          selective: true,
+        },
+        reply_to_message_id: msg.message_id,
+      });
     }
   }
 
@@ -192,7 +222,10 @@ export class MTGSearch {
    * @param msg - The initial message sent to the bot. It allows us to send a message back.
    * @param userCards - List of MTG cards that were returned from the user's search query.
    */
-  private sendMultipleCardResults(msg: TelegramBot.Message, userCards: Card[]): void {
+  private sendMultipleCardResults(
+    msg: TelegramBot.Message,
+    userCards: Card[]
+  ): void {
     let message: string = `Multiple cards found (${userCards.length}). Did you mean one of the following? If not, try refining or changing your query.\n`;
     if (userCards.length > 120) {
       message += `Results limited to 120\n`;
@@ -202,9 +235,11 @@ export class MTGSearch {
     userCards.forEach((card: Card, index: number) => {
       if (index < 120) {
         if (card.card_faces) {
-          keyboardCards.push([{ text: card.name + ' - ' + card.card_faces[0].type_line }]);
+          keyboardCards.push([
+            { text: card.name + " - " + card.card_faces[0].type_line },
+          ]);
         } else {
-          keyboardCards.push([{ text: card.name + ' - ' + card.type_line }]);
+          keyboardCards.push([{ text: card.name + " - " + card.type_line }]);
         }
       }
     });
@@ -237,9 +272,9 @@ export class MTGSearch {
     const targetCard: Card = cards.find((card: Card) => {
       if (card.card_faces) {
         // Multi faced card case
-        return messageText === card.name + ' - ' + card.card_faces[0].type_line;
+        return messageText === card.name + " - " + card.card_faces[0].type_line;
       } else {
-        return messageText === card.name + ' - ' + card.type_line;
+        return messageText === card.name + " - " + card.type_line;
       }
     });
 
@@ -249,5 +284,4 @@ export class MTGSearch {
     // TODO - consider failure case?
     delete this.cardResultsByUserId[userId];
   }
-
 }

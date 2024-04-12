@@ -25,6 +25,7 @@
     "dev": "npm run build && npm start"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.6.0",
     "firebase-admin": "^8.9.2",
     "gosugamers-api": "^0.1.2",
     "node-telegram-bot-api": "^0.40.0",
@@ -42,6 +43,7 @@
     "coveralls": "^3.0.9",
     "mocha": "^7.0.1",
     "nyc": "^15.0.0",
+    "prettier": "^3.2.5",
     "rimraf": "^3.0.2",
     "sinon": "^8.1.1",
     "ts-node": "^8.6.2",
