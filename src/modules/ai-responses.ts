@@ -16,34 +16,34 @@ export class HypeAI {
     this.HBot = botReference;
     this.genAI = new GoogleGenerativeAI(token);
 
-    const safetySettings = [
-      {
-        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-        threshold: HarmBlockThreshold.BLOCK_NONE,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-      },
-
-      {
-        category: HarmCategory.HARM_CATEGORY_UNSPECIFIED,
-        threshold: HarmBlockThreshold.BLOCK_NONE,
-      },
-
-      {
-        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-        threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-      },
-    ];
+    // const safetySettings = [
+    //   {
+    //     category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+    //     threshold: HarmBlockThreshold.BLOCK_NONE,
+    //   },
+    //   {
+    //     category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+    //     threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+    //   },
+    //
+    //   {
+    //     category: HarmCategory.HARM_CATEGORY_UNSPECIFIED,
+    //     threshold: HarmBlockThreshold.BLOCK_NONE,
+    //   },
+    //
+    //   {
+    //     category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+    //     threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+    //   },
+    //   {
+    //     category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+    //     threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+    //   },
+    // ];
 
     this.aiModel = this.genAI.getGenerativeModel({
       model: "gemini-pro",
-      safetySettings: safetySettings,
+      // safetySettings: safetySettings,
     });
 
     this.hypeAiRespond();
@@ -59,12 +59,10 @@ export class HypeAI {
             });
           })
           .catch((er) => {
-            console.error(
-              {
-                log: "[ERROR]: HB ASK MODULE ERROR",
-                error: er
-              }
-            )
+            console.error({
+              log: "[ERROR]: HB ASK MODULE ERROR",
+              error: er,
+            });
             this.HBot.sendMessage(
               msg.chat.id,
               "whoops, my brain is out of order",
