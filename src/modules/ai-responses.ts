@@ -55,7 +55,7 @@ export class HypeAI {
         this.handleAiPrompt(match[1])
           .then((aiRes) => {
             this.HBot.sendMessage(msg.chat.id, aiRes, {
-              parse_mode: "HTML",
+              parse_mode: "Markdown",
             });
           })
           .catch((er) => {
