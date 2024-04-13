@@ -50,7 +50,7 @@ export class HypeAI {
   }
 
   private hypeAiRespond() {
-    this.HBot.onText(/^\/hbask (.+)/gi, (msg, match) => {
+    this.HBot.onText(/^\/ask (.+)/gi, (msg, match) => {
       if (Boolean(match[1].trim()) && match[1].trim().length > 10) {
         this.handleAiPrompt(match[1])
           .then((aiRes) => {
@@ -58,7 +58,13 @@ export class HypeAI {
               parse_mode: "HTML",
             });
           })
-          .catch(() => {
+          .catch((er) => {
+            console.error(
+              {
+                log: "[ERROR]: HB ASK MODULE ERROR",
+                error: er
+              }
+            )
             this.HBot.sendMessage(
               msg.chat.id,
               "whoops, my brain is out of order",
